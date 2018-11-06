@@ -1,0 +1,48 @@
+# Ubuntu Image
+FROM ubuntu:latest
+
+# INSTALL DEVELOPMENT DEPENDENCIES
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    gcc \
+    g++ \
+    make \
+    curl \
+    git \
+    unzip \
+    autoconf \
+    automake \
+    libtool \
+    golang-go \
+    nodejs \
+    build-essential \
+    pkg-config \
+    npm \
+    ca-certificates \
+    && apt-get clean
+
+# SETUP PROTOC, GRPC, GO-GRPC
+ENV GRPC_RELEASE_TAG v1.12.x
+RUN git clone -b ${GRPC_RELEASE_TAG} https://github.com/grpc/grpc /var/local/git/grpc && \
+    cd /var/local/git/grpc && \
+    git submodule update --init && \
+    echo "--- installing protobuf ---" && \
+    cd third_party/protobuf && \
+    ./autogen.sh && ./configure --enable-shared && \
+    make -j$(nproc) && make -j$(nproc) check && make install && make clean && ldconfig && \
+    echo "--- installing grpc ---" && \
+    cd /var/local/git/grpc && \
+    make -j$(nproc) && make install && make clean && ldconfig
+
+# SETUP GRPC-WEB-PLUGIN
+RUN git clone -b https://github.com/grpc/grpc-web /var/local/git/grpc-grpc-web && \
+    cd /var/local/gt/grcp-web && \
+    echo "--- installing protobuf ---" && \
+    make install-plugin
+
+# Docker
+# Docker-compose
+
+# Add code volume
+
+# Expose Ports & Networking
+
